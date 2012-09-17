@@ -12,7 +12,7 @@ More details on the technique can be found in the paper "Approximate Similarity 
 = How to use the MI-File library=
 
 MI-File is entirely written in java and does not depends on any other library.
-In order to use it compile the source code with your preferred compiler then perform the following preliminary steps (see JavaDoc for additional embedded in source code for details):
+In order to use it compile the source code with your preferred compiler then perform the following preliminary steps (see JavaDoc embedded in source code for additional details):
 
  # You have to create a class that extends the abstract class  [http://code.google.com/p/mi-file/source/browse/#svn%2Ftrunk%2Fmi-file%2Fit%2Fcnr%2Fisti%2FSimilaritySearch%2FDataset Dataset.DatasetObject] that encapsulate your data objects.
  # Create a set of reference objects. To do that you have to use the class [http://code.google.com/p/mi-file/source/browse/#svn%2Ftrunk%2Fmi-file%2Fit%2Fcnr%2Fisti%2FSimilaritySearch%2FMI_File ReferenceObjects]. The  size of the set of reference objects can be estimated as 2*sqrt(dataset size).
