@@ -26,4 +26,4 @@ Note that there are other parameters you can use to play with.
  * ks determines the number of reference objects to be used to represent the query; it should be smaller than ki.
  * MaxPosDiff can be used to access just a portion of the posting lists; if MaxPosDiff is 10 just the portion of the posting lists corresponding to objects having reference objects in position +/- 10, with respect to those of the query, is accessed.
 
-The package Examples [[http://code.google.com/p/mi-file/source/browse/#svn%2Ftrunk%2Fmi-file%2FExamples]] contains source code examples of the above steps.
+The package [http://code.google.com/p/mi-file/source/browse/#svn%2Ftrunk%2Fmi-file%2FExamples Example] contains source code examples of the above steps.
