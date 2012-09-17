@@ -2,7 +2,7 @@
 
 = Introduction =
 
-MI-File allow you to perform approximate similarity search on huge datasets.
+MI-File allows you to perform approximate similarity search on huge datasets.
 
 The technique is based on the use of a space transformation where data objects are represented by ordered sequences of reference objects. The sequence of reference objects that represent a data object is ordered according to the distance of the reference objects from the data object being represented. Distance between two data objects is measured by computing the spearmann footrule distance between the two sequence of reference objects that represent them. The closer the two data objects the most similar the two sequence of reference objects. The index is based on the use of inverted files. 
 
