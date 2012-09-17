@@ -1,4 +1,4 @@
-#summary Getting Started
+#summary Basic Instructions
 
 = Introduction =
 
