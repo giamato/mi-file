@@ -1,5 +1,3 @@
-#MI-File Basics
-
 = Introduction =
 
 MI-File allow you to perform approximate similarity search on huge datasets.
