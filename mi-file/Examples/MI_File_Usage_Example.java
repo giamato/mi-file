@@ -6,8 +6,8 @@ import java.io.*;
 
 import it.cnr.isti.SimilaritySearch.MI_File.ReferenceObjects;
 import it.cnr.isti.SimilaritySearch.MI_File.MI_File;
-import it.cnr.isti.SimilaritySearch.Dataset.DatasetObject;
-import it.cnr.isti.SimilaritySearch.Dataset.Dataset;
+import it.cnr.isti.PersistentDataset.*;
+import it.cnr.isti.Dataset.*;
 
 /**
  * This class demonstrates how to use the MI_File class.
@@ -58,12 +58,12 @@ public class MI_File_Usage_Example {
 
             //now we add the reference objects
             for(int i=0;i<ref_objects_num;i++){
-                DatasetObject ref_obj=new Vector32D(i,null);
+                Vector32D ref_obj=new Vector32D(i,null);
                 //Here we initialize it randomly. However this is just an example.
                 //In reality you migh want to use a random sample of objects from the real dataset to be indexed.
-                ((Vector32D)ref_obj).initializeRandom();
+                ref_obj.initializeRandom();
                 //Let's add it to the set of reference objects
-                ros.add(ref_obj);
+                ros.insert(ref_obj);
             }
             //now we can save the set of reference objects
             ros.save(referenceObjectsFile);
@@ -81,7 +81,7 @@ public class MI_File_Usage_Example {
         System.out.println("Inserting "+datasetSize+ " objects in the database. It might take a while...");
 
         //Create and/or open the MI_File
-        MI_File mi_file=new MI_File(ref_objects_num, ki, ks, indexDirectory, referenceObjectsFile);
+        MI_File mi_file=new MI_File("rw",ref_objects_num, ki, ks, indexDirectory, referenceObjectsFile);
 
         try{
             //Let's begin bulk load
@@ -89,7 +89,7 @@ public class MI_File_Usage_Example {
 
             //now we insert the objects
             for(int i=0;i<datasetSize;i++){
-                DatasetObject obj=new Vector32D(i,null);
+                PersistentSimilarityDatasetObject obj=new Vector32D(i,null);
                 //Here we initialize it randomly. However this is just an example.
                 //In reality you will insert the objects from the real dataset to be indexed.
                 ((Vector32D)obj).initializeRandom();
@@ -128,7 +128,12 @@ public class MI_File_Usage_Example {
 
         //Let's get an object from the database to use as query. Note that you
         //can also use objects not inthe database.
-        DatasetObject query=mi_file.getDataset().getObject(queryObjectId);
+        SimilarityDatasetObject query=null;
+        try{
+            query=mi_file.getDataset().getObject(queryObjectId);
+        }catch(Exception e){
+            e.printStackTrace();
+        }
 
         //Now let's search for the k most similar objects to it...
         TreeMap<Double,Object> res=mi_file.kNN(query, k);
@@ -149,7 +154,7 @@ public class MI_File_Usage_Example {
         this.printRes(res, queryObjectId, k, mi_file.getDataset());
     }
     
-    private void printRes(TreeMap<Double,Object> inp, int objectQuery,int k,Dataset dataset)
+    private void printRes(TreeMap<Double,Object> inp, int objectQuery,int k,SimilarityDataset dataset)
     {
             java.util.Iterator s=inp.keySet().iterator();
             for(int i=0;s.hasNext()&&i<k;i++)
@@ -161,14 +166,18 @@ public class MI_File_Usage_Example {
                 if(className.equals("java.lang.Integer"))
                     System.out.print(" object: "+o);
                 else
-                    System.out.print(" object: "+((DatasetObject)o).getInternalId());
+                    System.out.print(" object: "+((SimilarityDatasetObject)o).getInternalId());
 
                 System.out.print("\t Computed distance: "+ distance);
                 if(dataset!=null){
-                    if(className.equals("java.lang.Integer"))
-                        System.out.println("\t Actual distance: "+ dataset.distance(dataset.getObject(objectQuery),dataset.getObject((Integer)inp.get(distance))));
-                    else
-                        System.out.println("\t Actual distance: "+ dataset.distance(dataset.getObject(objectQuery), (DatasetObject)o));
+                    try{
+                        if(className.equals("java.lang.Integer"))
+                            System.out.println("\t Actual distance: "+ dataset.distance(dataset.getObject(objectQuery),dataset.getObject((Integer)inp.get(distance))));
+                        else
+                            System.out.println("\t Actual distance: "+ dataset.distance(dataset.getObject(objectQuery), (SimilarityDatasetObject)o));
+                    }catch(Exception e){
+                        e.printStackTrace();
+                    }
                 }
                 else
                     System.out.println();

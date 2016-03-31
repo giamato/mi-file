@@ -8,7 +8,8 @@
  */
 
 package Examples;
-import it.cnr.isti.SimilaritySearch.Dataset.DatasetObject;
+import it.cnr.isti.PersistentDataset.PersistentSimilarityDatasetObject;
+import it.cnr.isti.Dataset.SimilarityDatasetObject;
 
 /**
  * Example of a data object consisting in a vector of 32 doubles
@@ -17,7 +18,7 @@ import it.cnr.isti.SimilaritySearch.Dataset.DatasetObject;
  * giuseppe.amato@isti.cnr.it
  */
 
-public class Vector32D extends DatasetObject{
+public class Vector32D implements PersistentSimilarityDatasetObject{
     static public int dim=32;
     private double objects[];
     private int id;
@@ -52,7 +53,7 @@ public class Vector32D extends DatasetObject{
         return Math.sqrt(dist);
     }
     
-    public double distance(DatasetObject o){
+    public double distance(SimilarityDatasetObject o){
         return eucledian_distance((Vector32D)o);
     }
 
