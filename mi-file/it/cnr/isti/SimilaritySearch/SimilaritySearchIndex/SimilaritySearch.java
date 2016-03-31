@@ -9,8 +9,7 @@
 
 package it.cnr.isti.SimilaritySearch.SimilaritySearchIndex;
 
-import it.cnr.isti.SimilaritySearch.Dataset.Dataset;
-import it.cnr.isti.SimilaritySearch.Dataset.DatasetObject;
+import it.cnr.isti.Dataset.*;
 import java.util.*;
 
 
@@ -22,7 +21,7 @@ import java.util.*;
  */
 public abstract class SimilaritySearch {
     
-    protected Dataset dataset=null;
+    protected SimilarityDataset dataset=null;
 
     /**
      * Computes the distance between two objects.
@@ -30,7 +29,11 @@ public abstract class SimilaritySearch {
      * @param o2 second object
      * @return distance between o1 and o2
      */
-    public abstract double distance(DatasetObject o1, DatasetObject o2);
+    //public abstract double distance(SimilarityDatasetObject o1, SimilarityDatasetObject o2);
+    public double distance(SimilarityDatasetObject o1, SimilarityDatasetObject o2) {
+        double dist=o1.distance(o2);
+        return dist;
+    }
         
         
     /** Creates a new instance of SimilaritySearch */
@@ -41,7 +44,7 @@ public abstract class SimilaritySearch {
     /** Creates a new instance of SimilaritySearch on a dataset/database
      * @param ds the dataset.
      */
-    public SimilaritySearch(Dataset ds) {
+    public SimilaritySearch(SimilarityDataset ds) {
         dataset=ds;
     }
 
@@ -49,7 +52,7 @@ public abstract class SimilaritySearch {
      * Returns the associated dataset/database.
      * @return the dataset
      */
-    public Dataset getDataset(){
+    public SimilarityDataset getDataset(){
         return dataset;
     }
 
@@ -63,29 +66,33 @@ public abstract class SimilaritySearch {
      * @param k the number of retrieved objects
      * @return a TreeMap containing k pairs (distance, identifier) ordered according to the distance
      */
-    public TreeMap<Double,Object> kNN(DatasetObject objectQuery, int k) {
-        TreeMap res=null;             
-        res=new TreeMap();
-        for(int i=0; i<dataset.size()&&getDataset().getObject(i)!=null;i++)
-        {
-            double dist=distance(objectQuery,getDataset().getObject(i));
-            Integer o=Integer.valueOf(i);
-            if(res.size()<k){
-                while(o!=null)
-                {
-                    o=(Integer)res.put(dist,o);
-                    dist+=0.0001;
-                }
-            }
-            else if(dist<(Double)res.lastKey())
+    public TreeMap<Double,Object> kNN(SimilarityDatasetObject objectQuery, int k) {
+        TreeMap res=null;
+        try{
+            res=new TreeMap();
+            for(int i=0; i<dataset.size()&&getDataset().getObject(i)!=null;i++)
             {
-                while(o!=null)
-                {
-                    o=(Integer)res.put(dist,o);
-                    dist+=0.0001;
+                double dist=distance(objectQuery,getDataset().getObject(i));
+                Integer o=Integer.valueOf(i);
+                if(res.size()<k){
+                    while(o!=null)
+                    {
+                        o=(Integer)res.put(dist,o);
+                        dist+=0.0001;
+                    }
                 }
-                res.remove(res.lastKey());
+                else if(dist<(Double)res.lastKey())
+                {
+                    while(o!=null)
+                    {
+                        o=(Integer)res.put(dist,o);
+                        dist+=0.0001;
+                    }
+                    res.remove(res.lastKey());
+                }
             }
+        }catch(Exception e){
+            e.printStackTrace();
         }
         return res;
     }     
@@ -98,30 +105,33 @@ public abstract class SimilaritySearch {
      * @param k number of objects to be retrieved
      * @return list of pairs (distance, objects)
      */
-    public TreeMap<Double,DatasetObject> retrieve(TreeMap<Integer,Double> identifiers, int k)
+    public TreeMap<Double,SimilarityDatasetObject> retrieve(TreeMap<Integer,Double> identifiers, int k)
     {
-
         java.util.Iterator s=identifiers.entrySet().iterator();
         TreeMap res=null;
-        if(dataset!=null)
-        {
-            res=new TreeMap();
-            while(s.hasNext()&& k>0)
+        try{
+            if(dataset!=null)
             {
-                k--;
-                java.util.Map.Entry<Integer,Double> e=(java.util.Map.Entry)s.next();
-                Double dist = e.getValue();
-                Integer o=e.getKey();
-                DatasetObject object = dataset.getObject(o);
-                object.setInternalId(o);   //Just to be sure. It should have already been done in objectDatabase.Insert()
-                while(res.get(dist)!=null)
+                res=new TreeMap();
+                while(s.hasNext()&& k>0)
                 {
-                    dist+=0.00000001;
+                    k--;
+                    java.util.Map.Entry<Integer,Double> e=(java.util.Map.Entry)s.next();
+                    Double dist = e.getValue();
+                    Integer o=e.getKey();
+                    DatasetObject object = dataset.getObject(o);
+                    object.setInternalId(o);   //Just to be sure. It should have already been done in objectDatabase.Insert()
+                    while(res.get(dist)!=null)
+                    {
+                        dist+=0.00000001;
+                    }
+                    res.put(dist,object);
                 }
-                res.put(dist,object);
             }
+            else System.out.println("Retrieval not performed. No dataset associated!");
+        }catch(Exception e){
+            e.printStackTrace();
         }
-        else System.out.println("Retrieval not performed. No dataset associated!");
         return res;       
     }
 
@@ -134,32 +144,36 @@ public abstract class SimilaritySearch {
      * @param k number of objects to be retrieved
      * @return list of pairs (distance, objects)
      */
-    public TreeMap<Double,DatasetObject> sortAndRetrieve(TreeMap<Double,Integer> identifiers, DatasetObject objectQuery, int k)
+    public TreeMap<Double,SimilarityDatasetObject> sortAndRetrieve(TreeMap<Double,Integer> identifiers, SimilarityDatasetObject objectQuery, int k)
     {
 //        System.out.println("Filtering result set");
         java.util.Iterator<Double> s=identifiers.keySet().iterator();
 //        if(s.hasNext())
 //            s.next(); //skip first to eliminate query object
         TreeMap res=null;
-        if(dataset!=null)
-        {
-            res=new TreeMap();
-            while(s.hasNext()&& k>0)
+        try{
+            if(dataset!=null)
             {
-                k--;
-                Double key=s.next();
-                Integer o=identifiers.get(key);
-                DatasetObject object = dataset.getObject(o);
-                object.setInternalId(o);    //Just to be sure. It should have already been done in objectDatabase.Insert()
-                Double dist = dataset.distance(objectQuery,object);
-                while(res.get(dist)!=null)
+                res=new TreeMap();
+                while(s.hasNext()&& k>0)
                 {
-                    dist+=0.00000001;
+                    k--;
+                    Double key=s.next();
+                    Integer o=identifiers.get(key);
+                    SimilarityDatasetObject object = dataset.getObject(o);
+                    object.setInternalId(o);    //Just to be sure. It should have already been done in objectDatabase.Insert()
+                    Double dist = dataset.distance(objectQuery,object);
+                    while(res.get(dist)!=null)
+                    {
+                        dist+=0.00000001;
+                    }
+                    res.put(dist,object);
                 }
-                res.put(dist,object);
             }
+            else System.out.println("Sort and retrieval not performed. No dataset associated!");
+        }catch(Exception e){
+            e.printStackTrace();
         }
-        else System.out.println("Sort and retrieval not performed. No dataset associated!");
         return res;       
     }
     
@@ -172,30 +186,34 @@ public abstract class SimilaritySearch {
      * @return list of pairs (distance, identifier)
 
      */
-    public TreeMap<Double,Integer> sort(TreeMap<Double,Integer> identifiers, DatasetObject objectQuery, int k)
+    public TreeMap<Double,Integer> sort(TreeMap<Double,Integer> identifiers, SimilarityDatasetObject objectQuery, int k)
     {
 //        System.out.println("Filtering result set");
         java.util.Iterator<Double> s=identifiers.keySet().iterator();
 //        if(s.hasNext())
 //            s.next(); //skip first to eliminate query object
         TreeMap res=null;
-        if(dataset!=null)
-        {
-            res=new TreeMap();
-            while(s.hasNext()&& k>0)
+        try{
+            if(dataset!=null)
             {
-                k--;
-                Double key=s.next();
-                Integer o=identifiers.get(key);
-                Double dist = dataset.distance(objectQuery,dataset.getObject(o));
-                while(res.get(dist)!=null)
+                res=new TreeMap();
+                while(s.hasNext()&& k>0)
                 {
-                    dist+=0.00000001;
+                    k--;
+                    Double key=s.next();
+                    Integer o=identifiers.get(key);
+                    Double dist = dataset.distance(objectQuery,dataset.getObject(o));
+                    while(res.get(dist)!=null)
+                    {
+                        dist+=0.00000001;
+                    }
+                    res.put(dist,o);
                 }
-                res.put(dist,o);
             }
+            else System.out.println("Sort not performed. No dataset associated!");
+        }catch(Exception e){
+            e.printStackTrace();
         }
-        else System.out.println("Sort not performed. No dataset associated!");
         return res;       
     }
     
